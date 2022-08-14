@@ -1,0 +1,150 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mp3tag.js@latest/dist/mp3tag.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="../script.js"></script>
+<link
+	rel="stylesheet"
+	href="https://cdn.jsdelivr.net/gh/hung1001/font-awesome-pro@4cac1a6/css/all.css"
+/>
+<link
+	rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+/>
+<link rel="stylesheet" href="./dist/style.css" />
+
+<!--
+TODO :
+1. playlist
+2. shortcut
+3. guideline
+4. loading & motions
+-->
+<div id="music-player" class="music music__player animate__slideInDown player">
+	<audio
+		style="display: none"
+		id="music-audio"
+		src="https://raw.githubusercontent.com/miko-github/miko-github/gh_assets/assets/sounds/Homayoun%20Shajarian%20-%20Arayeshe%20Ghaliz.mp3"
+		preload="metadata"
+		volume="0.5"
+	></audio>
+	<input
+		type="file"
+		multiple
+		class="music__uploader"
+		name="file-audio"
+		id="file-audio"
+		accept="audio/*"
+	/>
+	<div class="music__controller">
+		<button
+			id="music-backward"
+			title="backward"
+			class="music__btn music__btn--back button--backward"
+		>
+			<!-- ALT : fa-[step, fast, ]-backward -->
+			<i class="fa fa-fast-backward"></i>
+		</button>
+		<button
+			id="music-action"
+			title="play"
+			class="music__btn music__btn--play button--action"
+		>
+			<i class="fa fa-play"></i>
+		</button>
+		<button
+			id="music-forward"
+			title="forward"
+			class="music__btn music__btn--next button--forward"
+		>
+			<!-- ALT : fa-[step, fast, ]-forward -->
+			<i class="fa fa-fast-forward"></i>
+		</button>
+	</div>
+	<div class="music__main">
+		<div id="music-playlist" class="music__playlist">
+			<button
+				type="button"
+				id="playlist-close-btn"
+				class="playlist__close_btn"
+			>
+				<i class="fa fa-times"></i>
+			</button>
+			<ul
+				class="playlist__track_list"
+				id="playlist-tracks"
+				tabindex="0"
+			></ul>
+		</div>
+		<div class="music__meta">
+			<div class="music__name">
+				<h3 id="music-title" class="music__title">Arayeshe Ghaliz</h3>
+				<span id="music-desc" class="music__description">
+					Homayoun Shajarian
+				</span>
+			</div>
+
+			<div class="music__mixin">
+				<!-- STATE : --[off | on: [once | all]] -->
+				<button
+					id="music-repeat"
+					class="button--repeat music__repeat music__repeat--on music__repeat--all"
+				>
+					<!-- ALT : fa-[repeat, sync, sync-alt, retweet, retweet-alt, redo, redo-alt] -->
+					<i class="fa fa-repeat"></i>
+				</button>
+				<!-- STATE : --[off | on] -->
+				<button
+					id="music-shuffle"
+					class="music__shuffle button--shuffle"
+				>
+					<i class="fa fa-random"></i>
+				</button>
+				<!-- STATE : --[off | on] -->
+				<button id="music-playlist-open" class="music__playlist_open">
+					<i class="fa fa-list-music"></i>
+				</button>
+			</div>
+			<div class="music__volume volume" title="50%">
+				<button
+					id="music-volume-btn"
+					class="music__volume_btn volume__button button--volume"
+				>
+					<i class="fa fa-volume"></i>
+				</button>
+				<div
+					id="music-volume"
+					class="music__volume_range volume__bar bar--volume"
+				>
+					<span class="music__volume_handle"></span>
+				</div>
+			</div>
+
+			<div class="music__times duration">
+				<div id="music-seek" class="music__seek bar--duration">
+					<span class="music__seek_handle"></span>
+				</div>
+				<span
+					id="music-current-time"
+					class="music__current_time duration__current"
+				>
+					00:00:00
+				</span>
+				<span
+					id="music-duration"
+					class="music__duration duration__until"
+					>02:33</span
+				>
+			</div>
+		</div>
+		<div class="music__cover">
+			<img
+				id="music-cover"
+				class="music__image"
+				src="https://www.ganja2music.com/Image/Post/06.93/08/Homayoun-Shajarian---Arayes.jpg"
+				alt="mini music player - miko-github"
+			/>
+		</div>
+	</div>
+</div>
