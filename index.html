@@ -1,0 +1,119 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mp3tag.js@latest/dist/mp3tag.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="./script.js"></script>
+<link
+	rel="stylesheet"
+	href="https://cdn.jsdelivr.net/gh/hung1001/font-awesome-pro@4cac1a6/css/all.css"
+/>
+<link
+	rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+/>
+<link rel="stylesheet" href="./dist/v2.css" />
+
+<section class="player">
+	<header class="player__details details">
+		<h2 class="details__title placeholder--title">{ TITLE }</h2>
+		<p class="details__artist placeholder--artist">{ ARTIST }</p>
+	</header>
+
+	<section class="player__actions actions">
+		<button
+			type="button"
+			class="actions__button actions__button--repeat button--repeat button--active"
+		>
+			<i class="actions__icon icon--repeat fa fa-repeat"></i>
+		</button>
+
+		<button
+			type="button"
+			class="actions__button actions__button--shuffle button--shuffle button--diactive"
+		>
+			<i class="actions__icon icon--random fa fa-random"></i>
+		</button>
+
+		<button
+			type="button"
+			class="actions__button actions__button--playlist button--playlist"
+		>
+			<i class="actions__icon icon--playlist fa fa-list-music"></i>
+		</button>
+
+		<button
+			type="button"
+			class="actions__button actions__button--volume button--volume"
+		>
+			<i class="actions__icon icon--volume fa fa-volume"></i>
+		</button>
+
+		<div class="volume actions__bar actions__bar--volume bar--volume">
+			<span class="actions__handle volume__handle handle--volume"></span>
+		</div>
+
+		<div class="actions__wrap actions__wrap--duration">
+			<span class="duration__current placeholder--current">00:00:00</span>
+			<span class="duration__until placeholder--duration">02:33</span>
+		</div>
+
+		<div class="actions__bar actions__bar--duration bar--duration duration">
+			<span
+				class="duration__handle actions__handle handle--duration"
+			></span>
+		</div>
+	</section>
+
+	<section class="player__controls controls">
+		<button
+			tabindex="0"
+			class="controls__button controls__button--backward button--backward"
+		>
+			<i class="controls__icon icon--backward fa fa-fast-backward"></i>
+		</button>
+
+		<button
+			tabindex="0"
+			class="controls__button controls__button--action button--action"
+		>
+			<i class="controls__icon icon--action fa fa-play"></i>
+		</button>
+
+		<button
+			tabindex="0"
+			class="controls__button controls__button--forward button--forward"
+		>
+			<i class="controls__icon icon--forward fa fa-fast-forward"></i>
+		</button>
+	</section>
+
+	<figure class="details__cover cover">
+		<img
+			class="cover__image placeholder--cover"
+			src="https://www.ganja2music.com/Image/Post/06.93/08/Homayoun-Shajarian---Arayes.jpg"
+			alt="{ COVER-ALT }"
+		/>
+		<figcaption style="display: none"></figcaption>
+	</figure>
+
+	<section class="player__playlist playlist playlist--diactive">
+		<ul class="playlist__list"></ul>
+	</section>
+	<button
+		type="button"
+		class="playlist__button playlist__button--close button--close"
+	>
+		<i class="playlist__icon icon--close fa fa-times"></i>
+	</button>
+
+	<!-- METADATA -->
+	<audio
+		style="display: none"
+		id="player-main-audio"
+		src="https://raw.githubusercontent.com/miko-github/miko-github/gh_assets/assets/sounds/Homayoun%20Shajarian%20-%20Arayeshe%20Ghaliz.mp3"
+		preload="metadata"
+		volume="0.5"
+	></audio>
+	<!-- TODO : <input type="file" /> -->
+</section>

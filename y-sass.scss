@@ -1,0 +1,746 @@
+/* [ YEK/SASS - VERSION : 3.2.0 ] */
+
+/// DEPENDENCIES //
+@use 'sass:list' as LIST;
+@use 'sass:string' as STR;
+@use 'sass:meta' as META;
+@use 'sass:map' as MAP;
+
+/// length
+/// @group function, string
+/// @param {String} $string
+/// @return {Number} $length - Length of the string
+@function length($collection) {
+  @if META.type-of($collection) == 'string' {
+    @return STR.length($collection);
+  }
+  @if META.type-of($collection) == 'list' {
+    @return LIST.length($collection);
+  }
+}
+
+@function len($collection) {
+  @return length($collection);
+}
+
+/// split without delimiter
+/// @access private
+/// @func-size (664 bytes)
+/// @speed-test (70.xxx sec)
+@function _split-by-null($string) {
+  // empty list
+  $fragment: ();
+  // constant index
+  $index: 1;
+  // walk string when length of string is greater than 1
+  @while $index <= len($string) - 1 {
+    // get first character of string
+    $item: STR.slice($string, 0, $index);
+    // push item to fragment
+    $fragment: LIST.append($fragment, $item);
+    // remove first character of string
+    $string: STR.slice($string, $index + 1);
+  }
+  // push last character of string to fragment
+  $fragment: LIST.append($fragment, $string);
+  @return $fragment;
+}
+
+/// split with delimiter
+/// @access private
+/// @func-size (695 bytes)
+/// @speed-test (68.xxx sec)
+@function _split-by-sep($string, $sep: ':') {
+  // empty list
+  $fragment: ();
+  // find first index of delimiter
+  $index: STR.index($string, $sep);
+  // walk through string
+  @while $index != null {
+    // get string of value
+    $item: STR.slice($string, 1, $index - 1);
+    // push item to fragment
+    $fragment: LIST.append($fragment, $item);
+    // remove walked string
+    $string: STR.slice($string, $index + len($sep));
+    // find new index of delimiter
+    $index: STR.index($string, $sep);
+  }
+  // push last character of string to fragment
+  $fragment: LIST.append($fragment, $string);
+  // return splited string
+  @return $fragment;
+}
+
+/// split - split a string into list by separator
+/// @access public
+/// @func-size (829 bytes)
+/// @speed-test (65.xxx ~ 70.xxx sec)
+/// @group helpers
+/// @param {String} $string
+/// @param {String} $sep [':'|'.'|'-'|' ']
+/// @return {List} $splited-string
+@function split($string, $sep: null) {
+  // type-check of `$string`
+  @if type-of($string) != 'string' {
+    @error 'The argument $string: `#{$string}` is of incorrect type: `#{type-of($string)}`. Type of `String` is required!';
+  } @else if $sep != null and type-of($sep) != 'string' {
+    @error 'The argument $string: `#{$sep}` is of incorrect type: `#{type-of($sep)}`. Type of `String` is required!';
+  }
+
+  // if seprator not passed or is empty string
+  @if $sep == null or len($sep) == 0 or $sep == '' {
+    @return _split-by-null($string);
+  } @else {
+    // else seprator passed
+    @return _split-by-sep($string, $sep);
+  }
+}
+
+// sass default funciton have warning
+@function unit($value) {
+  @return STR.slice($value * 0 + '', 2, -1);
+}
+
+///
+// A collection of function for advanced type checking
+// @author Kitty Giraudel
+// @from `https://css-tricks.com/snippets/sass/advanced-type-checking/`
+///
+
+@function is-number($value) {
+  @return type-of($value) == 'number';
+}
+
+@function is-time($value) {
+  @return is-number($value) and index('ms' 's', unit($value)) != null;
+}
+
+@function is-duration($value) {
+  @return is-time($value);
+}
+
+@function is-angle($value) {
+  @return is-number($value) and index('deg' 'rad' 'grad' 'turn', unit($value))
+    != null;
+}
+
+@function is-frequency($value) {
+  @return is-number($value) and index('Hz' 'kHz', unit($value)) != null;
+}
+
+@function is-integer($value) {
+  @return is-number($value) and round($value) == $value;
+}
+
+@function is-relative-length($value) {
+  @return is-number($value) and
+    index('em' 'ex' 'ch' 'rem' 'vw' 'vh' 'vmin' 'vmax', unit($value)) != null;
+}
+
+@function is-absolute-length($value) {
+  @return is-number($value) and
+    index('cm' 'mm' 'in' 'px' 'pt' 'pc', unit($value)) != null;
+}
+
+@function is-percentage($value) {
+  @return is-number($value) and unit($value) == '%';
+}
+
+@function is-length($value) {
+  @return is-relative-length($value) or is-absolute-length($value);
+}
+
+@function is-resolution($value) {
+  @return is-number($value) and index('dpi' 'dpcm' 'dppx', unit($value)) != null;
+}
+
+@function is-position($value) {
+  @return is-length($value) or is-percentage($value) or
+    index('top' 'right' 'bottom' 'left' 'center', $value) != null;
+}
+
+// @author (YEK/DEV) [Miko Mikoloism]
+// @from `https://github.com/yek-org/yek-sass`
+@function is-unitless($value) {
+  @return unit($value) == '';
+}
+
+// NOTE : may this be confiusing, then rename to `val` or `value`
+@function val($name) {
+  @return unquote('var(--#{$name})');
+}
+
+// HINT : set variable property with value
+@mixin set-var($name, $value) {
+  --#{$name}: #{$value};
+}
+
+// HINT : set the `:root` selector variable
+@mixin set-root($variables) {
+  @at-root :root {
+    @each $name, $value in $variables {
+      @include set-var($name, $value);
+    }
+  }
+}
+
+// HINT : convert any color to rgb/rgba
+@function to-rgb($color, $alpha: 1, $sep: ' ') {
+  $red: red($color);
+  $green: green($color);
+  $blue: blue($color);
+  $res: null;
+  @if $sep == ' ' {
+    $res: '#{$red}#{$sep}#{$green}#{$sep}#{$blue} / #{$alpha}';
+  } @else {
+    $res: '#{$red}#{$sep}#{$green}#{$sep}#{$blue}#{$sep}#{$alpha}';
+  }
+  @return unquote('rgb(#{$res})');
+}
+
+// HINT : convert any color to hsl/hsla
+@function to-hsl($color, $alpha: 1, $sep: ' ') {
+  $hue: hue($color);
+  $saturation: saturation($color);
+  $lightness: lightness($color);
+  $res: null;
+  @if $sep == ' ' {
+    $res: '#{$hue}#{$sep}#{$saturation}#{$sep}#{$lightness} / #{$alpha}';
+  } @else {
+    $res: '#{$hue}#{$sep}#{$saturation}#{$sep}#{$lightness}#{$sep}#{$alpha}';
+  }
+  @return unquote('hsl(#{$res})');
+}
+
+// HINT : get variable color with `hsl` method
+@function color($var-name) {
+  @return #{val('color-#{$var-name}')};
+}
+@mixin set-colors($colors) {
+  & {
+    @each $name, $value in $colors {
+      @include set-var(#{unquote('color-#{$name}')}, #{$value});
+    }
+  }
+}
+
+// [START _flex.scss]
+@mixin grid(
+  $flow: row,
+  $cols: null,
+  $rows: null,
+  $gap: null,
+  $temp: (
+    rows: null,
+    cols: null,
+  )
+) {
+  grid-auto-flow: $flow;
+
+  @if $gap not null {
+    grid-gap: $gap;
+  }
+
+  @if map-get($temp, rows) not null {
+    grid-template-rows: #{map-get($temp, rows)};
+  }
+  @if map-get($temp, cols) not null {
+    grid-template-columns: #{map-get($temp, cols)};
+  }
+
+  @if $cols not null {
+    grid-auto-columns: $cols;
+  }
+  @if $rows not null {
+    grid-auto-rows: $rows;
+  }
+}
+
+@mixin flex($dir: row, $wrap: wrap) {
+  display: flex;
+  flex-direction: $dir;
+  flex-wrap: $wrap;
+}
+@mixin align($ver: null, $hor: null, $content: null) {
+  @if $hor == null and $ver == null {
+    align-items: center;
+    justify-content: center;
+  }
+  @if $hor not null {
+    align-items: $hor; // hor
+  }
+  @if $ver not null {
+    justify-content: $ver; // ver
+  }
+  @if $content not null {
+    align-content: $content;
+  }
+}
+@mixin aligns($align: center) {
+  @include align($align, $align, $align);
+}
+@mixin center($type: flex-row) {
+  @if $type ==
+    flex or
+    $type ==
+    flex-row or
+    $type ==
+    fr or
+    $type ==
+    frow or
+    $type ==
+    f-row
+  {
+    @include flex;
+  } @else if
+    $type ==
+    flex-column or
+    $type ==
+    fc or
+    $type ==
+    f-col or
+    $type ==
+    f-column or
+    $type ==
+    flex-col
+  {
+    @include flex(column);
+  } @else if $type == grid-row or $type == g-row {
+    @include grid(row);
+  } @else if
+    $type ==
+    grid-column or
+    $type ==
+    g-col or
+    $type ==
+    grid-col or
+    $type ==
+    g-column
+  {
+    @include grid(column);
+  }
+  @include aligns;
+}
+
+// [END _flex.scss]
+
+// [START _size.scss]
+
+@mixin width($w: null, $max: null, $min: null, $tog: null) {
+  @if $w == null and $max == null and $min == null {
+    @if $tog == null {
+      width: 100%;
+      max-width: 100%;
+      min-width: 100%;
+    } @else {
+      width: $tog;
+      max-width: $tog;
+      min-width: $tog;
+    }
+  }
+  @if $w not null {
+    width: $w;
+  }
+  @if $max not null {
+    max-width: $max;
+  }
+  @if $min not null {
+    min-width: $min;
+  }
+}
+
+@mixin height($h: null, $max: null, $min: null, $tog: null) {
+  @if $h == null and $max == null and $min == null {
+    @if $tog == null {
+      height: 100%;
+      max-height: 100%;
+      min-height: 100%;
+    } @else {
+      height: $tog;
+      max-height: $tog;
+      min-height: $tog;
+    }
+  }
+  @if $h not null {
+    height: $h;
+  }
+  @if $max not null {
+    max-height: $max;
+  }
+  @if $min not null {
+    min-height: $min;
+  }
+}
+
+//=> [w min max]|w, [h min max]|h, ([w+h min max])|(together: w+h), min, max
+@mixin size($w: null, $h: null, $tog: null, $min: null, $max: null) {
+  @if $w ==
+    null and
+    $h ==
+    null and
+    $tog ==
+    null and
+    $min ==
+    null and
+    $max ==
+    null
+  {
+    width: 100%;
+    height: 100%;
+  }
+  @if $w ==
+    null and
+    $h ==
+    null and
+    $tog not
+    null and
+    $min ==
+    null and
+    $max ==
+    null
+  {
+    @if type-of($tog) == 'list' {
+      @include width(LIST.nth($tog, 1), LIST.nth($tog, 2), LIST.nth($tog, 3));
+      @include height(LIST.nth($tog, 1), LIST.nth($tog, 2), LIST.nth($tog, 3));
+    } @else {
+      width: $tog;
+      height: $tog;
+    }
+  }
+  // TODO : max and min together
+  // NOTE : max = ((width, height)) | (width & height)
+  // NOTE : min = ((width, height)) | (width & height)
+  @if $w not null {
+    @if type-of($w) == 'list' {
+      @include width(LIST.nth($w, 1), LIST.nth($w, 2), LIST.nth($w, 3));
+    } @else {
+      width: $w;
+    }
+  }
+  @if $h not null {
+    @if type-of($h) == 'list' {
+      @include height(LIST.nth($h, 1), LIST.nth($h, 2), LIST.nth($h, 3));
+    } @else {
+      height: $h;
+    }
+  }
+}
+
+// [END _size.scss]
+
+// [START _position.scss]
+
+@mixin position(
+  $type: null,
+  $top: null,
+  $left: null,
+  $bottom: null,
+  $right: null
+) {
+  @if $type not null {
+    position: $type;
+  }
+  @if $top not null {
+    top: $top;
+  }
+  @if $left not null {
+    left: $left;
+  }
+  @if $bottom not null {
+    bottom: $bottom;
+  }
+  @if $right not null {
+    right: $right;
+  }
+}
+@mixin absolute($top: null, $left: null, $bottom: null, $right: null) {
+  @include position(absolute, $top, $left, $bottom, $right);
+}
+@mixin fixed($top: null, $left: null, $bottom: null, $right: null) {
+  @include position(fixed, $top, $left, $bottom, $right);
+}
+@mixin relative($top: null, $left: null, $bottom: null, $right: null) {
+  @include position(relative, $top, $left, $bottom, $right);
+}
+
+// [END _position.scss]
+
+$breakpoints: (
+  'small': (
+    min-width: 767px,
+  ),
+  'medium': (
+    min-width: 992px,
+  ),
+  'large': (
+    min-width: 1200px,
+  ),
+) !default;
+
+@mixin media($breakpoint) {
+  // If the key exists in the map
+  @if map-has-key($breakpoints, $breakpoint) {
+    // Prints a media query based on the value
+    @media #{inspect(map-get($breakpoints, $breakpoint))} {
+      @content;
+    }
+  }
+
+  // If the key doesn't exist in the map
+  @else {
+    @warn "Unfortunately, no value could be retrieved from `#{$breakpoint}`. "
+        + "Available breakpoints are: #{map-keys($breakpoints)}.";
+  }
+}
+
+@mixin clear-space {
+  padding: 0;
+  margin: 0;
+}
+
+@mixin clear-list {
+  list-style-type: none;
+  @include clear-space;
+}
+
+// HINT : fieldset, form, figure
+@mixin clear-frame {
+  fieldset,
+  form,
+  figure {
+    @include clear-space;
+  }
+  figcaption {
+    display: none;
+  }
+}
+
+@mixin clear-border {
+  border: none;
+  outline: none;
+  stroke: none;
+  box-shadow: none;
+}
+
+@mixin radius($offset: 9, $unit: px) {
+  border-radius: #{unquote('#{$offset}#{unquote($unit)}')};
+}
+
+@mixin clear-input(
+  $fluid: false,
+  $color: (
+    focus: color(input-focus),
+    hover: color(input-hover),
+  ),
+  $effect: true
+) {
+  letter-spacing: 1.7px;
+  @include clear-space;
+  @include clear-border;
+
+  @if ($fluid == true) {
+    @include size($tog: 100%);
+  } @else {
+    @include size(150px, 50px);
+  }
+
+  @if $effect == true {
+    transition: 0.2s 0s ease-out;
+    &:hover {
+      box-shadow: 0 0 0 0.25rem #{map-get($color, hover)};
+    }
+    &:focus {
+      box-shadow: 0 0 0 0.25rem #{map-get($color, focus)};
+    }
+  }
+}
+
+@mixin clear-button($effect: false) {
+  @include clear-border;
+  cursor: pointer;
+
+  @if $effect == true {
+    &:hover {
+      transform: scale(1.05);
+    }
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+}
+
+@mixin clear-fab(
+  $float: false,
+  $offset: 60,
+  $radius: 60,
+  $position: (
+    bottom: 15px,
+    right: 20px,
+  )
+) {
+  @include clear-button(true);
+  $size: unquote('#{$offset}px');
+  @include size($size, $size);
+  @if $float == true {
+    @include fixed(
+      $top: map-get($position, top),
+      $bottom: map-get($position, bottom),
+      $right: map-get($position, right),
+      $left: map-get($position, left)
+    );
+  }
+  @include radius($radius);
+  z-index: 99990;
+}
+
+@mixin image-fit-cover {
+  @include clear-space;
+  @include size;
+  object-fit: cover;
+}
+
+@mixin text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin case($case: null) {
+  $_case: none;
+  @if $case == lower or $case == lowercase {
+    $_case: lowercase;
+  } @else if $case == upper or $case == uppercase {
+    $_case: uppercase;
+  } @else if $case == title or $case == capitalize {
+    $_case: capitalize;
+  } @else if $case == full or $case == full-width {
+    $_case: full-width;
+  } @else if $case == null or $case == none {
+    $_case: none;
+  } @else {
+    $_case: none;
+  }
+  text-transform: $_case;
+}
+
+// [START _transform.scss]
+// NOTE : DEPRECATED (on v1.0.5)
+
+@mixin transform($transform: null) {
+  @if $transform not null {
+    transform: $transform;
+  }
+}
+@mixin translate($x: null, $y: null, $z: null) {
+  @if $z not null {
+    @include transform(translateZ($z));
+  }
+  @if $y not null {
+    @include transform(translateY($y));
+  }
+  @if $x not null {
+    @include transform(translateX($x));
+  }
+}
+
+@mixin scale($x: null, $y: null, $z: null) {
+  @if $z not null {
+    @include transform(scaleZ($z));
+  }
+  @if $y not null {
+    @include transform(scaleY($y));
+  }
+  @if $x not null {
+    @include transform(scaleX($x));
+  }
+}
+
+@mixin rotate($z: null, $x: null, $y: null) {
+  @if $z not null {
+    @include transform(rotateZ($z));
+  }
+  @if $y not null {
+    @include transform(rotateY($y));
+  }
+  @if $x not null {
+    @include transform(rotateX($x));
+  }
+}
+
+// [END _transform.scss]
+
+// stylesheets / presets //
+
+.visible-hidden {
+  visibility: hidden;
+}
+
+@mixin clear-root {
+  /* __[ FONT'S ]__ */
+  @import url('https://fonts.googleapis.com/css?family=Montserrat'); // NOTE : Montserrat
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap'); // NOTE : Roboto
+  @import url('https://fonts.googleapis.com/css2?family=Lalezar&display=swap'); // NOTE : lalezar font
+  @import url('https://cdn.jsdelivr.net/npm/yekan-font@1.0.0/css/yekan-font.min.css'); // NOTE : yekan font
+
+  /* __[ VARIABLE ]__ */
+  $color-primary: hsl(229, 53%, 22%);
+  $color-secondary: hsl(222, 35%, 74%);
+  $color-gray: hsl(215, 46%, 91%);
+  $color-light-gray: hsl(220, 53%, 97%);
+  $color-white: hsl(0, 0%, 100%);
+  $color-black: hsl(275, 10%, 24%);
+  $color-input-hover: hsl(222 35% 74% / 60%); // NOTE : $color-secondary / 60%
+  $color-input-focus: hsl(229 53% 22% / 45%); // NOTE : $color-primary / 45%
+  $color-input-error: hsl(17deg 100% 56% / 60%);
+  $color-input-warning: hsl(49deg 51% 43% / 60%);
+  $color-input-success: hsl(120deg 69% 29% / 45%);
+  $color-input-disabled: $color-gray;
+  $font-proxima: 'proxima-soft', 'Proxima Soft', 'Proxima Nova Soft', Helvetica,
+    Arial, sans-serif;
+  $font-family: 'Roboto', 'Montserrat', 'sans-serif';
+  $font-persian: 'Yekan', 'Lalezar', cursive;
+
+  /* __[ :ROOT ]__ */
+  @include set-root(
+    (
+      color-primary: $color-primary,
+      color-secondary: $color-secondary,
+      color-gray: $color-gray,
+      color-light-gray: $color-light-gray,
+      color-white: $color-white,
+      color-black: $color-black,
+      color-input-hover: $color-input-hover,
+      color-input-focus: $color-input-focus,
+      color-input-error: $color-input-error,
+      color-input-warning: $color-input-warning,
+      color-input-success: $color-input-success,
+      color-input-disabled: $color-input-disabled,
+      font-family: $font-family,
+      font-persian: $font-persian,
+      font-proxima: $font-proxima,
+    )
+  );
+
+  /* __[ STYLE ]__ */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    transition: 0.2s ease all;
+  }
+
+  body,
+  html {
+    padding: 0;
+    margin: 0;
+    font-family: val(font-family);
+  }
+
+  body {
+    @include flex(column);
+    width: 100vw;
+    min-height: 100vh;
+    font-family: val(font-family);
+  }
+}
