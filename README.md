@@ -23,3 +23,5 @@ Thank you for Like / Star this project ❤️️ / 🌟
 -   use classical
 -   refactor (style-scss)
 -   refactor (html-dom)
+
+:build-structure: [WARN : This is not perfection project]
