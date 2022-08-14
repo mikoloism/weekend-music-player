@@ -24,4 +24,11 @@ Thank you for Like / Star this project ❤️️ / 🌟
 -   refactor (style-scss)
 -   refactor (html-dom)
 
+### /\* TODO \*/
+
+- [ ] support upload file
+- [ ] refactor playlist class and side effects
+- [ ] remove unneccessery deps (etc. lodash)
+- [ ] replace some deps by better (etc. momentjs by dayjs)
+
 ⚠️[WARN : This is not perfection project]
